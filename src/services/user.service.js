@@ -1,4 +1,5 @@
 const userModel = require("./../models/user.model");
+const postModel = require("./../models/post.model");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const app_constant = require("./../constant/app.json");
@@ -67,8 +68,27 @@ exports.userLogin = async (data) => {
 
 exports.userProfile = async (data) => {
     const { id } = data;
+    // const user_data = await userModel.findOne(
+    //     { _id: id },
+    //     { _id: 0, _v: 0, password: 0 }
+    // );
 
-    const user_data = await userModel.findById(id);
+    const [user_data, postCount] = await Promise.all([
+        userModel.findOne({ _id: id }, { _id: 0, _v: 0, password: 0 }),
+        postModel.countDocuments({ user_id: id }),
+    ]);
+
+    // const postCount = await postModel.countDocuments({ user_id: id });
+    const result = JSON.parse(JSON.stringify(user_data));
+    const follower_count = user_data.followers.length;
+    const following_count = user_data.followings.length;
+
+    result.followers_count = follower_count;
+    result.followings_count = following_count;
+    result.postCount = postCount;
+
+    delete result.followers;
+    delete result.followings;
 
     if (!user_data) {
         return {
@@ -83,7 +103,8 @@ exports.userProfile = async (data) => {
         success: 1,
         status: app_constant.SUCCESS,
         message: "user loggedin successfully",
-        result: user_data,
+        // postCount,
+        result: result,
     };
 };
 
@@ -316,6 +337,45 @@ exports.getFollowingList = async (user_data, data) => {
             success: 1,
             status: app_constant.SUCCESS,
             message: "Following list fetched successfully!",
+            total_count,
+            result,
+        };
+    }
+
+    return {
+        success: 0,
+        status: app_constant.INTERNAL_SERVER_ERROR,
+        message: "Internal server error!",
+        result: {},
+    };
+};
+
+exports.getPostList = async (userId, data) => {
+    const limit = data.limit ? data.limit : 10000;
+    const offset = data.offset ? data.offset : 0;
+    const search = data.search ? data.search : "";
+    const query = { user_id: userId };
+
+    if (search) {
+        const regex = new RegExp(search, "i");
+        query["$or"] = [{ caption: regex }];
+    }
+
+    const total_count = await postModel.countDocuments(query);
+
+    // const result = await User.findById(_id).select({ _id: 0, followings: 1 }).populate('followings')
+
+    const result = await postModel
+        .find(query)
+        .select({ file_url: 1, caption: 1, _id: 1, createdAt: 1, updatedAt: 1 })
+        .skip(offset)
+        .limit(limit);
+
+    if (result) {
+        return {
+            success: 1,
+            status: app_constant.SUCCESS,
+            message: "Post list fetched successfully!",
             total_count,
             result,
         };

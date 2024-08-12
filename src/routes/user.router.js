@@ -22,5 +22,6 @@ UserRouter.get(
     middleware.verifyToken,
     userController.FollowingList
 );
+UserRouter.get("/postList", middleware.verifyToken, userController.PostsList);
 
 module.exports = UserRouter;

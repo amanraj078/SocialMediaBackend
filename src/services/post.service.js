@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const app_constant = require("./../constant/app.json");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("./../helpers/cloudinary");
+const fs = require("fs");
 
 exports.UploadPost = async (data, user_data) => {
     //check if email already exists or not
@@ -18,6 +19,9 @@ exports.UploadPost = async (data, user_data) => {
     });
 
     if (upload_post) {
+        fs.unlink(file.path, (err) => {
+            console.log(err);
+        });
         return {
             success: 1,
             status_code: app_constant.SUCCESS,

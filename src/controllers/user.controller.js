@@ -219,3 +219,30 @@ exports.FollowingList = async (request, response) => {
         });
     }
 };
+
+exports.PostsList = async (request, response) => {
+    try {
+        // if all the filleds are filled then..
+        const userId = request.query.userId;
+
+        if (!userId) {
+            return response.status(400).json({
+                success: 0,
+                status_code: app_constant.BAD_REQUEST,
+                message: "User ID is required.",
+                result: {},
+            });
+        }
+        const getPost = await userService.getPostList(userId, request.query);
+
+        return response.json(getPost);
+    } catch (error) {
+        console.log(error);
+        response.json({
+            success: 0,
+            status_code: app_constant.INTERNAL_SERVER_ERROR,
+            message: error.message,
+            result: {},
+        });
+    }
+};
