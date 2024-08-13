@@ -4,6 +4,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const app_constant = require("./../constant/app.json");
 const jwt = require("jsonwebtoken");
+const { toIST } = require("./../utils/DateTime");
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -351,6 +352,8 @@ exports.getFollowingList = async (user_data, data) => {
 };
 
 exports.getPostList = async (userId, data) => {
+    // In a utility file (e.g., dateUtils.js)
+
     const limit = data.limit ? data.limit : 10000;
     const offset = data.offset ? data.offset : 0;
     const search = data.search ? data.search : "";
@@ -363,13 +366,25 @@ exports.getPostList = async (userId, data) => {
 
     const total_count = await postModel.countDocuments(query);
 
-    // const result = await User.findById(_id).select({ _id: 0, followings: 1 }).populate('followings')
-
-    const result = await postModel
+    const posts = await postModel
         .find(query)
-        .select({ file_url: 1, caption: 1, _id: 1, createdAt: 1, updatedAt: 1 })
+        .select({
+            file_url: 1,
+            caption: 1,
+            _id: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            like: 1,
+        })
         .skip(offset)
-        .limit(limit);
+        .limit(limit)
+        .sort({ createdAt: -1 });
+
+    const result = posts.map((post) => ({
+        ...post.toObject(),
+        createdAt: toIST(post.createdAt),
+        updatedAt: toIST(post.updatedAt),
+    }));
 
     if (result) {
         return {

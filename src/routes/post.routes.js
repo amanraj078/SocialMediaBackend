@@ -12,4 +12,14 @@ PostRouter.post(
     postController.UploadPost
 );
 
+PostRouter.post(
+    "/update",
+    middleware.verifyToken,
+    upload.single("file"),
+    postController.UpdatePost
+);
+
+PostRouter.post("/like", middleware.verifyToken, postController.LikePost);
+PostRouter.post("/unlike", middleware.verifyToken, postController.UnlikePost);
+
 module.exports = PostRouter;
