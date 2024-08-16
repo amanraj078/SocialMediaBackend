@@ -26,6 +26,14 @@ exports.verifyToken = async (req, res, next) => {
 
     const { id } = verify_token;
     const user_data = await userModel.findById(id);
+    if (token !== user_data.token) {
+        return res.json({
+            success: 0,
+            status_code: 401,
+            message: "Inavalid token",
+            result: {},
+        });
+    }
     req.user = user_data;
     next();
 };

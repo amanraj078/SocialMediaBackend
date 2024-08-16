@@ -1,5 +1,6 @@
 const userModel = require("./../models/user.model");
 const postModel = require("./../models/post.model");
+const sendEmail = require("./../helpers/sendEmail");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const app_constant = require("./../constant/app.json");
@@ -24,6 +25,8 @@ exports.userSignUp = async (data) => {
     const hashPassword = await bcrypt.hash(data.password, salt);
 
     const addUser = await userModel.create({ ...data, password: hashPassword });
+
+    await sendEmail(data.email, data.username);
     return {
         success: 1,
         status: app_constant.SUCCESS,
@@ -59,6 +62,8 @@ exports.userLogin = async (data) => {
 
     const token = jwt.sign({ id: user_data._id }, SECRET_KEY);
 
+    await userModel.updateOne({ _id: user_data }, { $set: { token } });
+
     return {
         success: 1,
         status: app_constant.SUCCESS,
@@ -66,6 +71,10 @@ exports.userLogin = async (data) => {
         result: token,
     };
 };
+
+// exports.forgetPassword = async (data) => {
+
+// }
 
 exports.userProfile = async (data) => {
     const { id } = data;

@@ -79,6 +79,21 @@ exports.UserLogin = async (request, response) => {
     }
 };
 
+// exports.forgetPassword = async (req, res) => {
+//     try {
+//         const forgetPassword = await userService.forgetPassword(req.body);
+//         return res.json(forgetPassword);
+//     } catch (error) {
+//         console.log(error);
+//         res.json({
+//             success: 0,
+//             status_code: app_constant.INTERNAL_SERVER_ERROR,
+//             message: error.message,
+//             result: {},
+//         });
+//     }
+// }
+
 exports.UserProfile = async (request, response) => {
     try {
         const required_fields = ["id"];

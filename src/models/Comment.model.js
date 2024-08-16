@@ -1,4 +1,4 @@
-const { default: mongoose, Schema } = require("mongoose");
+const { Schema, model, default: mongoose } = require("mongoose");
 
 const commentSchema = new Schema(
     {
@@ -7,19 +7,30 @@ const commentSchema = new Schema(
             required: true,
         },
         user_id: {
-            type: Schema.ObjectId,
+            type: mongoose.Schema.ObjectId,
             ref: "user",
             required: true,
         },
-        like: {
-            type: Schema.ObjectId,
-            ref: "user",
-            default: [],
+        post_id: {
+            type: mongoose.Schema.ObjectId,
+            ref: "post",
+            required: true,
         },
-        comments: [{ type: Schema.ObjectId, ref: "comment", default: [] }],
+        likes: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: "user",
+                default: [],
+            },
+        ],
+        parent_id: {
+            type: mongoose.Schema.ObjectId,
+            ref: "comment",
+            default: null,
+        },
     },
     { timestamps: true }
 );
 
-const commentModel = model("comment", commentSchema);
-module.exports = commentModel;
+const Comment = model("comment", commentSchema);
+module.exports = Comment;

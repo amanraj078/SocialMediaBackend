@@ -21,9 +21,6 @@ const postSchema = new Schema(
                 default: [],
             },
         ],
-        comments: [
-            { type: mongoose.Schema.ObjectId, ref: "comment", default: [] },
-        ],
     },
     { timestamps: true }
 );
